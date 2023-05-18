@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Queue Management</h1>
+    <div class="queue-wrapper">
+      <div class="queue sub-queue" id="subQueue">
+        <div class="queue-label">Sub Queue</div>
+        <div class="elements-wrapper" id="subQueueElements">
+        </div>
+      </div>
+      <div class="queue main-queue" id="mainQueue">
+        <div class="queue-label">Main Queue</div>
+        <div class="elements-wrapper" id="mainQueueElements">
+        </div>
+      </div>
+    </div>
+    <div id="countdown" class="countdown"></div>
+    <div class="buttons">
+      <button id="startTimerButton">Start Timer</button>
+      <button id="resetTimerButton">Reset Timer</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
