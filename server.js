@@ -85,6 +85,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-server.listen(3000, () => {
-    console.log('Server started on http://localhost:3000');
+const port = process.env.PORT || 3000; // Use the port specified by the environment variable, or fallback to port 3000
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
