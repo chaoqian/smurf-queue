@@ -10,6 +10,7 @@ const io = socketIO(server);
 let mainQueue = ['Element 1', 'Element 2', 'Element 3'];
 let subQueue = ['Element A', 'Element B'];
 let mainQueueSize = 3;
+let startTimerClicked = false;
 // Countdown timer
 let countdownTimer = null;
 let defaultTimerSeconds = 5;
@@ -30,6 +31,7 @@ io.on('connection', (socket) => {
 
     // Start the countdown timer
     function startTimer() {
+        startTimerClicked = true;
         countdownTimer = setInterval(() => {
             // Notify all connected clients about the updated countdown
             io.emit('countdown', remainingSeconds);
@@ -42,6 +44,7 @@ io.on('connection', (socket) => {
                 io.emit('queueData', { mainQueue, subQueue });
                 clearInterval(countdownTimer);
                 remainingSeconds = defaultTimerSeconds;
+                startTimerClicked = false;
             }
         }, 1000); // 1 second
     }
@@ -58,6 +61,10 @@ io.on('connection', (socket) => {
 
     // Handle start timer event from the client
     socket.on('startTimer', () => {
+        if (startTimerClicked)
+        {
+            return;
+        }
         startTimer()
     });
 
