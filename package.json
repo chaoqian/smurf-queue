@@ -1,0 +1,14 @@
+{
+    "name": "queue-management",
+    "version": "1.0.0",
+    "description": "Queue management application",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "socket.io": "^4.5.1"
+    }
+  }
+  
