@@ -149,6 +149,7 @@ io.on('connection', (socket) => {
         // Reset the timer
         remainingSeconds = defaultTimerSeconds; // 10 minutes in seconds
         io.emit('countdown', remainingSeconds);
+        startTimerClicked = false;
     });
 
     // Handle start timer event from the client
