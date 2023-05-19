@@ -1,18 +1,34 @@
 const socket = io();
 
 function displayQueues(queueData) {
-  document.getElementById('mainQueueElements-D').innerHTML = queueData.mainQueue.map(createQueueElement).join('');
-  document.getElementById('subQueueElements-D').innerHTML = queueData.subQueue.map(createQueueElement).join('');
+  // Defender
+  document.getElementById('mainQueueElements-D').innerHTML = queueData.def_mainQueue.map(createQueueElement).join('');
+  document.getElementById('subQueueElements-D').innerHTML = queueData.def_subQueue.map(createQueueElement).join('');
   // Display elements shifting from sub queue to main queue
-  displayShiftToMainQueueElements(queueData.shiftToMainQueue);
-
+  displayShiftToMainQueueElements(queueData.def_shiftToMain, 'D');
   // Display elements shifting from main queue to sub queue
-  displayShiftToSubQueueElements(queueData.shiftToSubQueue);
+  displayShiftToSubQueueElements(queueData.def_shiftToSub, 'D');
+
+  // Midfielder
+  document.getElementById('mainQueueElements-M').innerHTML = queueData.mid_mainQueue.map(createQueueElement).join('');
+  document.getElementById('subQueueElements-M').innerHTML = queueData.mid_subQueue.map(createQueueElement).join('');
+  // Display elements shifting from sub queue to main queue
+  displayShiftToMainQueueElements(queueData.mid_shiftToMain, 'M');
+  // Display elements shifting from main queue to sub queue
+  displayShiftToSubQueueElements(queueData.mid_shiftToSub, 'M');
+
+  // Forward
+  document.getElementById('mainQueueElements-F').innerHTML = queueData.for_mainQueue.map(createQueueElement).join('');
+  document.getElementById('subQueueElements-F').innerHTML = queueData.for_subQueue.map(createQueueElement).join('');
+  // Display elements shifting from sub queue to main queue
+  displayShiftToMainQueueElements(queueData.for_shiftToMain, 'F');
+  // Display elements shifting from main queue to sub queue
+  displayShiftToSubQueueElements(queueData.for_shiftToSub, 'F');
 }
 
 function createQueueElement(element) {
   return '<div class="queue-element">' + element + '</div>';
-} 
+}
 
 function displayCountdown(seconds) {
   var minutes = Math.floor(seconds / 60);
@@ -23,8 +39,8 @@ function displayCountdown(seconds) {
 }
 
 // Function to display elements shifting from sub queue to main queue
-function displayShiftToMainQueueElements(elements) {
-  const shiftToMainQueueElements = document.getElementById('shiftToMainQueueElements');
+function displayShiftToMainQueueElements(elements, position) {
+  const shiftToMainQueueElements = document.getElementById('shiftToMainQueueElements' + '-' + position);
   shiftToMainQueueElements.innerHTML = '';
 
   elements.forEach((element) => {
@@ -39,8 +55,8 @@ function displayShiftToMainQueueElements(elements) {
 }
 
 // Function to display elements shifting from main queue to sub queue
-function displayShiftToSubQueueElements(elements) {
-  const shiftToSubQueueElements = document.getElementById('shiftToSubQueueElements');
+function displayShiftToSubQueueElements(elements, position) {
+  const shiftToSubQueueElements = document.getElementById('shiftToSubQueueElements' + '-' + position);
   shiftToSubQueueElements.innerHTML = '';
 
   elements.forEach((element) => {

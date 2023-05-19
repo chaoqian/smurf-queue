@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Queue Management Page</h1>
+    <div class="queue-size-input">
+      <div>
+      <label for="defSubQueueSize">Def Sub Queue Size:</label>
+      <input type="number" id="defSubQueueSize" min="0" value="1">
+      <button id="updateDefSubQueueSizeButton">Input</button>
+      </div>
+      
+      <div>
+      <label for="midSubQueueSize">Mid Sub Queue Size:</label>
+      <input type="number" id="midSubQueueSize" min="0" value="1">
+      <button id="updateMidSubQueueSizeButton">Input</button>
+      </div>
+      
+      <div>
+      <label for="forSubQueueSize">For Sub Queue Size:</label>
+      <input type="number" id="forSubQueueSize" min="0" value="1">
+      <button id="updateForSubQueueSizeButton">Input</button>
+      </div>
+    </div>
+  </div>
+  <script src="manager-script.js"></script>
+</body>
+
+</html>
