@@ -1,21 +1,88 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
 </head>
+
 <body>
   <div class="container">
     <h1>Queue Management</h1>
-    <div class="queue-wrapper">
-      <div class="queue sub-queue" id="subQueue">
-        <div class="queue-label">Sub Queue</div>
-        <div class="elements-wrapper" id="subQueueElements">
+    <div class="container">
+      <h2>Defender</h2>
+      <div class="queue-wrapper">
+        <div class="queue sub-queue" id="subQueue">
+          <div class="queue-label">Sub Queue</div>
+          <div class="elements-wrapper" id="subQueueElements-D">
+          </div>
+        </div>
+        <div class="queue main-queue" id="mainQueue">
+          <div class="queue-label">Main Queue</div>
+          <div class="elements-wrapper" id="mainQueueElements-D">
+          </div>
         </div>
       </div>
-      <div class="queue main-queue" id="mainQueue">
-        <div class="queue-label">Main Queue</div>
-        <div class="elements-wrapper" id="mainQueueElements">
+      <div id="shiftDisplayContainer">
+        <div class="shift-section sub-queue" id="shiftToMainQueue">
+          <div class="shift-label">Players to Main Queue</div>
+          <ul class="shift-elements" id="shiftToMainQueueElements"></ul>
+        </div>
+        <div class="shift-section main-queue" id="shiftToSubQueue">
+          <div class="shift-label">Players to Sub Queue</div>
+          <ul class="shift-elements" id="shiftToSubQueueElements"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Midfielder</h2>
+      <div class="queue-wrapper">
+        <div class="queue sub-queue" id="subQueue">
+          <div class="queue-label">Sub Queue</div>
+          <div class="elements-wrapper" id="subQueueElements-M">
+          </div>
+        </div>
+        <div class="queue main-queue" id="mainQueue">
+          <div class="queue-label">Main Queue</div>
+          <div class="elements-wrapper" id="mainQueueElements-M">
+          </div>
+        </div>
+      </div>
+      <div id="shiftDisplayContainer">
+        <div class="shift-section sub-queue" id="shiftToMainQueue">
+          <div class="shift-label">Players to Main Queue</div>
+          <ul class="shift-elements" id="shiftToMainQueueElements"></ul>
+        </div>
+        <div class="shift-section main-queue" id="shiftToSubQueue">
+          <div class="shift-label">Players to Sub Queue</div>
+          <ul class="shift-elements" id="shiftToSubQueueElements"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Forward</h2>
+      <div class="queue-wrapper">
+        <div class="queue sub-queue" id="subQueue">
+          <div class="queue-label">Sub Queue</div>
+          <div class="elements-wrapper" id="subQueueElements-F">
+          </div>
+        </div>
+        <div class="queue main-queue" id="mainQueue">
+          <div class="queue-label">Main Queue</div>
+          <div class="elements-wrapper" id="mainQueueElements-F">
+          </div>
+        </div>
+      </div>
+      <div id="shiftDisplayContainer">
+        <div class="shift-section sub-queue" id="shiftToMainQueue">
+          <div class="shift-label">Players to Main Queue</div>
+          <ul class="shift-elements" id="shiftToMainQueueElements"></ul>
+        </div>
+        <div class="shift-section main-queue" id="shiftToSubQueue">
+          <div class="shift-label">Players to Sub Queue</div>
+          <ul class="shift-elements" id="shiftToSubQueueElements"></ul>
         </div>
       </div>
     </div>
@@ -27,4 +94,5 @@
   </div>
   <script src="script.js"></script>
 </body>
+
 </html>

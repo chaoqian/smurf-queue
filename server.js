@@ -9,6 +9,8 @@ const io = socketIO(server);
 // Queue data stored in memory (replace with a database in production)
 let mainQueue = ['Element 1', 'Element 2', 'Element 3'];
 let subQueue = ['Element A', 'Element B'];
+let shiftToMainQueue = ['A', 'B'];
+let shiftToSubQueue = ['C', 'D'];
 let mainQueueSize = 3;
 let startTimerClicked = false;
 // Countdown timer
@@ -27,7 +29,7 @@ function shiftQueues() {
 // Socket.io event handlers
 io.on('connection', (socket) => {
     // Send the initial queue data to the client
-    socket.emit('queueData', { mainQueue, subQueue });
+    socket.emit('queueData', { mainQueue, subQueue, shiftToMainQueue, shiftToSubQueue});
 
     // Start the countdown timer
     function startTimer() {
@@ -41,7 +43,7 @@ io.on('connection', (socket) => {
                 shiftQueues()
 
                 // Notify all connected clients about the updated queue data
-                io.emit('queueData', { mainQueue, subQueue });
+                io.emit('queueData', { mainQueue, subQueue, shiftToMainQueue, shiftToSubQueue});
                 clearInterval(countdownTimer);
                 remainingSeconds = defaultTimerSeconds;
                 startTimerClicked = false;
@@ -71,7 +73,7 @@ io.on('connection', (socket) => {
     // Handle queueDataRequest event from the client
     socket.on('queueDataRequest', () => {
         // Send the initial queue data to the client
-        socket.emit('queueData', { mainQueue, subQueue });
+        socket.emit('queueData', { mainQueue, subQueue, shiftToMainQueue, shiftToSubQueue});
     });
 
 });

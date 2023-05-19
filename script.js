@@ -1,8 +1,13 @@
 const socket = io();
 
 function displayQueues(queueData) {
-  document.getElementById('mainQueueElements').innerHTML = queueData.mainQueue.map(createQueueElement).join('');
-  document.getElementById('subQueueElements').innerHTML = queueData.subQueue.map(createQueueElement).join('');
+  document.getElementById('mainQueueElements-D').innerHTML = queueData.mainQueue.map(createQueueElement).join('');
+  document.getElementById('subQueueElements-D').innerHTML = queueData.subQueue.map(createQueueElement).join('');
+  // Display elements shifting from sub queue to main queue
+  displayShiftToMainQueueElements(queueData.shiftToMainQueue);
+
+  // Display elements shifting from main queue to sub queue
+  displayShiftToSubQueueElements(queueData.shiftToSubQueue);
 }
 
 function createQueueElement(element) {
@@ -15,6 +20,38 @@ function displayCountdown(seconds) {
 
   var countdown = document.getElementById('countdown');
   countdown.innerText = minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+}
+
+// Function to display elements shifting from sub queue to main queue
+function displayShiftToMainQueueElements(elements) {
+  const shiftToMainQueueElements = document.getElementById('shiftToMainQueueElements');
+  shiftToMainQueueElements.innerHTML = '';
+
+  elements.forEach((element) => {
+    const li = document.createElement('li');
+    li.textContent = element;
+    li.classList.add('shift-animation'); // Add 'shift-animation' class to the list item
+    shiftToMainQueueElements.appendChild(li);
+  });
+
+  // Trigger CSS animation for shift elements
+  // shiftToMainQueueElements.classList.add('shift-animation');
+}
+
+// Function to display elements shifting from main queue to sub queue
+function displayShiftToSubQueueElements(elements) {
+  const shiftToSubQueueElements = document.getElementById('shiftToSubQueueElements');
+  shiftToSubQueueElements.innerHTML = '';
+
+  elements.forEach((element) => {
+    const li = document.createElement('li');
+    li.textContent = element;
+    li.classList.add('shift-animation'); // Add 'shift-animation' class to the list item
+    shiftToSubQueueElements.appendChild(li);
+  });
+
+  // Trigger CSS animation for shift elements
+  // shiftToSubQueueElements.classList.add('shift-animation');
 }
 
 socket.on('queueData', (queueData) => {
