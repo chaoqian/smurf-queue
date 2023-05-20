@@ -190,6 +190,20 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle updateSubQueueSize event from the client
+    socket.on('updateDefaultTimeoutSeconds', (defaultTimeoutSeconds) => {
+        defaultTimerSeconds = defaultTimeoutSeconds;
+
+        // Stop the current timer
+        clearInterval(countdownTimer);
+
+        // Reset the timer
+        remainingSeconds = defaultTimerSeconds; // 10 minutes in seconds
+        io.emit('countdown', remainingSeconds);
+        startTimerClicked = false;
+    });
+    
+
     // Handle updateMainQueueSize event from the client
     socket.on('updateMainQueueSize', (size, type) => {
         // set sub queue size

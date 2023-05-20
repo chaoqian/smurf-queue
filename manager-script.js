@@ -30,7 +30,20 @@ updateForSubQueueSizeButton.addEventListener('click', () => {
   updateSubQueueSize(forSubQueueSize, 'For');
 });
 
+// Handle update default timeout seconds button click event
+const updateDefaultTimeoutSecondsButton = document.getElementById('updateDefaultTimeoutSecondsButton');
+updateDefaultTimeoutSecondsButton.addEventListener('click', () => {
+  const defaultTimeoutSecondsInput = document.getElementById('defaultTimeoutSeconds');
+  const defaultTimeoutSeconds = parseInt(defaultTimeoutSecondsInput.value, 10);
+  updateDefaultTimeoutSeconds(defaultTimeoutSeconds);
+});
+
 // Function to update the sub queue size
 function updateSubQueueSize(size, type) {
   socket.emit('updateSubQueueSize', size, type);
+}
+
+// Function to update default timeout seconds
+function updateDefaultTimeoutSeconds(defaultTimeoutSeconds) {
+  socket.emit('updateDefaultTimeoutSeconds', defaultTimeoutSeconds);
 }
