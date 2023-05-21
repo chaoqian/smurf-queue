@@ -30,11 +30,11 @@ function createQueueElement(element) {
   return '<div class="queue-element">' + element + '</div>';
 }
 
-function displayCountdown(seconds) {
+function displayCountdown(seconds, prefix) {
   var minutes = Math.floor(seconds / 60);
   var remainingSeconds = seconds % 60;
 
-  var countdown = document.getElementById('countdown');
+  var countdown = document.getElementById(prefix + '-' + 'countdown');
   countdown.innerText = minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
 }
 
@@ -74,21 +74,55 @@ socket.on('queueData', (queueData) => {
   displayQueues(queueData);
 });
 
-// Listen for countdown event from the server
-socket.on('countdown', (countdown) => {
-  displayCountdown(countdown);
+/// Listen for countdown event from the server
+socket.on('def-countdown', (countdown) => {
+  displayCountdown(countdown, 'def');
 });
 
 // Handle reset timer button click event
-const resetTimerButton = document.getElementById('resetTimerButton');
-resetTimerButton.addEventListener('click', () => {
-  socket.emit('resetTimer');
+const def_resetTimerButton = document.getElementById('def-resetTimerButton');
+def_resetTimerButton.addEventListener('click', () => {
+  socket.emit('resetTimer', 'def');
 });
 
 // Handle start timer button click event
-const startTimerButton = document.getElementById('startTimerButton');
-startTimerButton.addEventListener('click', () => {
-  socket.emit('startTimer');
+const def_startTimerButton = document.getElementById('def-startTimerButton');
+def_startTimerButton.addEventListener('click', () => {
+  socket.emit('startTimer', 'def');
+});
+
+/// Listen for countdown event from the server
+socket.on('mid-countdown', (countdown) => {
+  displayCountdown(countdown, 'mid');
+});
+
+// Handle reset timer button click event
+const mid_resetTimerButton = document.getElementById('mid-resetTimerButton');
+mid_resetTimerButton.addEventListener('click', () => {
+  socket.emit('resetTimer', 'mid');
+});
+
+// Handle start timer button click event
+const mid_startTimerButton = document.getElementById('mid-startTimerButton');
+mid_startTimerButton.addEventListener('click', () => {
+  socket.emit('startTimer', 'mid');
+});
+
+/// Listen for countdown event from the server
+socket.on('for-countdown', (countdown) => {
+  displayCountdown(countdown, 'for');
+});
+
+// Handle reset timer button click event
+const for_resetTimerButton = document.getElementById('for-resetTimerButton');
+for_resetTimerButton.addEventListener('click', () => {
+  socket.emit('resetTimer', 'for');
+});
+
+// Handle start timer button click event
+const for_startTimerButton = document.getElementById('for-startTimerButton');
+for_startTimerButton.addEventListener('click', () => {
+  socket.emit('startTimer', 'for');
 });
 
 // Trigger the initial rendering of queues when the page is loaded

@@ -26,43 +26,56 @@ let mid_subQueueSize = 0;
 let for_mainQueueSize = 3;
 let for_subQueueSize = 0;
 
+class Timer {
+    startTimerClicked;
+    countdownTimer;
+    defaultTimerSeconds;
+    remainingSeconds;
 
-// Helper
-let startTimerClicked = false;
+    constructor() {
+        this.startTimerClicked = false;
+        this.countdownTimer = null;
+        this.defaultTimerSeconds = 600;
+        this.remainingSeconds = 600;
+    }
+}
 
-// Countdown timer
-let countdownTimer = null;
-let defaultTimerSeconds = 600;
-let remainingSeconds = defaultTimerSeconds; // 10 minutes in seconds
-
-function shiftQueues() {
-    var subQueueSize = def_subQueue.length;
-    var mainQueueSize = def_mainQueue.length;
-    def_shiftToMain = def_subQueue.splice(0, subQueueSize);
-    def_mainQueue = def_shiftToMain.concat(def_mainQueue);
-    def_shiftToSub = def_mainQueue.splice(mainQueueSize, subQueueSize);
-    def_subQueue = def_shiftToSub.concat(def_subQueue);
-    def_shiftToMain = def_subQueue.slice();
-    def_shiftToSub = def_subQueue.length > 0 ? def_mainQueue.slice(-1 * def_subQueue.length) : [];
+let def_timer = new Timer();
+let mid_timer = new Timer();
+let for_timer = new Timer();
 
 
-    subQueueSize = mid_subQueue.length;
-    mainQueueSize = mid_mainQueue.length;
-    mid_shiftToMain = mid_subQueue.splice(0, subQueueSize);
-    mid_mainQueue = mid_shiftToMain.concat(mid_mainQueue);
-    mid_shiftToSub = mid_mainQueue.splice(mainQueueSize, subQueueSize);
-    mid_subQueue = mid_shiftToSub.concat(mid_subQueue);
-    mid_shiftToMain = mid_subQueue.slice();
-    mid_shiftToSub = mid_subQueue.length > 0 ? mid_mainQueue.slice(-1 * mid_subQueue.length) : [];
-
-    subQueueSize = for_subQueue.length;
-    mainQueueSize = for_mainQueue.length;
-    for_shiftToMain = for_subQueue.splice(0, subQueueSize);
-    for_mainQueue = for_shiftToMain.concat(for_mainQueue);
-    for_shiftToSub = for_mainQueue.splice(mainQueueSize, subQueueSize);
-    for_subQueue = for_shiftToSub.concat(for_subQueue);
-    for_shiftToMain = for_subQueue.slice();
-    for_shiftToSub = for_subQueue.length > 0 ? for_mainQueue.slice(-1 * for_subQueue.length) : [];
+function shiftQueues(prefix) {
+    if (prefix == "def") {
+        var subQueueSize = def_subQueue.length;
+        var mainQueueSize = def_mainQueue.length;
+        def_shiftToMain = def_subQueue.splice(0, subQueueSize);
+        def_mainQueue = def_shiftToMain.concat(def_mainQueue);
+        def_shiftToSub = def_mainQueue.splice(mainQueueSize, subQueueSize);
+        def_subQueue = def_shiftToSub.concat(def_subQueue);
+        def_shiftToMain = def_subQueue.slice();
+        def_shiftToSub = def_subQueue.length > 0 ? def_mainQueue.slice(-1 * def_subQueue.length) : [];
+    }
+    else if (prefix == "mid") {
+        var subQueueSize = mid_subQueue.length;
+        var mainQueueSize = mid_mainQueue.length;
+        mid_shiftToMain = mid_subQueue.splice(0, subQueueSize);
+        mid_mainQueue = mid_shiftToMain.concat(mid_mainQueue);
+        mid_shiftToSub = mid_mainQueue.splice(mainQueueSize, subQueueSize);
+        mid_subQueue = mid_shiftToSub.concat(mid_subQueue);
+        mid_shiftToMain = mid_subQueue.slice();
+        mid_shiftToSub = mid_subQueue.length > 0 ? mid_mainQueue.slice(-1 * mid_subQueue.length) : [];
+    }
+    else {
+        var subQueueSize = for_subQueue.length;
+        var mainQueueSize = for_mainQueue.length;
+        for_shiftToMain = for_subQueue.splice(0, subQueueSize);
+        for_mainQueue = for_shiftToMain.concat(for_mainQueue);
+        for_shiftToSub = for_mainQueue.splice(mainQueueSize, subQueueSize);
+        for_subQueue = for_shiftToSub.concat(for_subQueue);
+        for_shiftToMain = for_subQueue.slice();
+        for_shiftToSub = for_subQueue.length > 0 ? for_mainQueue.slice(-1 * for_subQueue.length) : [];
+    }
 }
 
 function getData() {
@@ -115,6 +128,25 @@ function resetAndInitQueueState(queue, size, prefix, startIndex) {
     }
 }
 
+function getTimer(prefix) {
+    var timerInstance = null;
+    switch (prefix) {
+        case 'def':
+            timerInstance = def_timer;
+            break;
+        case 'mid':
+            timerInstance = mid_timer;
+            break;
+        case 'for':
+            timerInstance = for_timer;
+            break;
+        default:
+            timerInstance = def_timer;
+            break;
+    }
+    return timerInstance;
+}
+
 init();
 // Socket.io event handlers
 io.on('connection', (socket) => {
@@ -122,42 +154,45 @@ io.on('connection', (socket) => {
     socket.emit('queueData', getData());
 
     // Start the countdown timer
-    function startTimer() {
-        startTimerClicked = true;
-        countdownTimer = setInterval(() => {
+    function startTimer(prefix) {
+        var timerInstance = getTimer(prefix);
+        timerInstance.startTimerClicked = true;
+        timerInstance.countdownTimer = setInterval(() => {
             // Notify all connected clients about the updated countdown
-            io.emit('countdown', remainingSeconds);
-            remainingSeconds--;
-            if (remainingSeconds < 0) {
+            io.emit(prefix + '-' + 'countdown', timerInstance.remainingSeconds);
+            timerInstance.remainingSeconds--;
+            if (timerInstance.remainingSeconds < 0) {
                 // Perform the queue shifting logic here
-                shiftQueues()
+                shiftQueues(prefix)
 
                 // Notify all connected clients about the updated queue data
                 io.emit('queueData', getData());
-                clearInterval(countdownTimer);
-                remainingSeconds = defaultTimerSeconds;
-                startTimerClicked = false;
+                clearInterval(timerInstance.countdownTimer);
+                timerInstance.remainingSeconds = timerInstance.defaultTimerSeconds;
+                timerInstance.startTimerClicked = false;
             }
         }, 1000); // 1 second
     }
 
     // Handle reset timer event from the client
-    socket.on('resetTimer', () => {
+    socket.on('resetTimer', (prefix) => {
+        var timerInstance = getTimer(prefix);
         // Stop the current timer
-        clearInterval(countdownTimer);
+        clearInterval(timerInstance.countdownTimer);
 
         // Reset the timer
-        remainingSeconds = defaultTimerSeconds; // 10 minutes in seconds
-        io.emit('countdown', remainingSeconds);
-        startTimerClicked = false;
+        timerInstance.remainingSeconds = timerInstance.defaultTimerSeconds; // 10 minutes in seconds
+        io.emit(prefix + '-' + 'countdown', timerInstance.remainingSeconds);
+        timerInstance.startTimerClicked = false;
     });
 
     // Handle start timer event from the client
-    socket.on('startTimer', () => {
-        if (startTimerClicked) {
+    socket.on('startTimer', (prefix) => {
+        var timerInstance = getTimer(prefix);
+        if (timerInstance.startTimerClicked) {
             return;
         }
-        startTimer()
+        startTimer(prefix)
     });
 
     // Handle queueDataRequest event from the client
@@ -191,18 +226,19 @@ io.on('connection', (socket) => {
     });
 
     // Handle updateSubQueueSize event from the client
-    socket.on('updateDefaultTimeoutSeconds', (defaultTimeoutSeconds) => {
-        defaultTimerSeconds = defaultTimeoutSeconds;
+    socket.on('updateDefaultTimeoutSeconds', (defaultTimeoutSeconds, prefix) => {
+        var timerInstance = getTimer(prefix);
+        timerInstance.defaultTimerSeconds = defaultTimeoutSeconds;
 
         // Stop the current timer
-        clearInterval(countdownTimer);
+        clearInterval(timerInstance.countdownTimer);
 
         // Reset the timer
-        remainingSeconds = defaultTimerSeconds; // 10 minutes in seconds
-        io.emit('countdown', remainingSeconds);
-        startTimerClicked = false;
+        timerInstance.remainingSeconds = defaultTimeoutSeconds; // 10 minutes in seconds
+        io.emit(prefix + '-' + 'countdown', timerInstance.remainingSeconds);
+        timerInstance.startTimerClicked = false;
     });
-    
+
 
     // Handle updateMainQueueSize event from the client
     socket.on('updateMainQueueSize', (size, type) => {

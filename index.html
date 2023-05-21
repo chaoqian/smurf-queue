@@ -9,7 +9,7 @@
 <body>
   <div class="container">
     <h1>Queue Management</h1>
-    <div class="container">
+    <div class="container defender">
       <h2>Defender</h2>
       <div class="queue-wrapper">
         <div class="shift-arrow"></div>
@@ -36,9 +36,14 @@
           <ul class="shift-elements" id="shiftToSubQueueElements-D"></ul>
         </div>
       </div>
+      <div id="def-countdown" class="countdown"></div>
+      <div class="buttons">
+        <button id="def-startTimerButton">Start Timer</button>
+        <button id="def-resetTimerButton">Reset Timer</button>
+      </div>
     </div>
 
-    <div class="container">
+    <div class="container midfielder">
       <h2>Midfielder</h2>
       <div class="queue-wrapper">
         <div class="shift-arrow"></div>
@@ -65,9 +70,14 @@
           <ul class="shift-elements" id="shiftToSubQueueElements-M"></ul>
         </div>
       </div>
+      <div id="mid-countdown" class="countdown"></div>
+      <div class="buttons">
+        <button id="mid-startTimerButton">Start Timer</button>
+        <button id="mid-resetTimerButton">Reset Timer</button>
+      </div>
     </div>
 
-    <div class="container">
+    <div class="container forward">
       <h2>Forward</h2>
       <div class="queue-wrapper">
         <div class="shift-arrow"></div>
@@ -94,11 +104,11 @@
           <ul class="shift-elements" id="shiftToSubQueueElements-F"></ul>
         </div>
       </div>
-    </div>
-    <div id="countdown" class="countdown"></div>
-    <div class="buttons">
-      <button id="startTimerButton">Start Timer</button>
-      <button id="resetTimerButton">Reset Timer</button>
+      <div id="for-countdown" class="countdown"></div>
+      <div class="buttons">
+        <button id="for-startTimerButton">Start Timer</button>
+        <button id="for-resetTimerButton">Reset Timer</button>
+      </div>
     </div>
   </div>
   <script src="script.js"></script>

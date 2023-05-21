@@ -3,6 +3,19 @@
   margin-top: 50px;
 }
 
+.defender {
+  background-color: #adf3c2;
+}
+
+.midfielder {
+  background-color: #5af188;
+}
+
+.forward {
+  background-color: #069b33;
+}
+
+
 #shiftDisplayContainer {
   margin-top: 20px;
   display: flex;
