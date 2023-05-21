@@ -5,26 +5,29 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+const ShiftType = {
+    ONE_BY_ONE: 'one by one',
+    SUB_AT_ONCE: 'sub all at once'
+};
 
 // Queue data stored in memory (replace with a database in production)
-let def_mainQueue = [];
-let def_subQueue = [];
-let def_shiftToMain = [];
-let def_shiftToSub = [];
-let mid_mainQueue = [];
-let mid_subQueue = [];
-let mid_shiftToMain = [];
-let mid_shiftToSub = [];
-let for_mainQueue = [];
-let for_subQueue = [];
-let for_shiftToMain = [];
-let for_shiftToSub = [];
-let def_mainQueueSize = 3;
-let def_subQueueSize = 0;
-let mid_mainQueueSize = 3;
-let mid_subQueueSize = 0;
-let for_mainQueueSize = 3;
-let for_subQueueSize = 0;
+class PositionQueues {
+    mainQueue;
+    subQueue;
+    shiftToMain;
+    shiftToSub;
+    mainQueueSize;
+    subQueueSize;
+
+    constructor() {
+        this.mainQueue = [];
+        this.subQueue = [];
+        this.shiftToMain = [];
+        this.shiftToSub = [];
+        this.mainQueueSize = 3;
+        this.subQueueSize = 0;
+    }
+}
 
 class Timer {
     startTimerClicked;
@@ -40,93 +43,14 @@ class Timer {
     }
 }
 
+let def_queues = new PositionQueues();
+let mid_queues = new PositionQueues();
+let for_queues = new PositionQueues();
+
 let def_timer = new Timer();
 let mid_timer = new Timer();
 let for_timer = new Timer();
 
-
-function shiftQueues(prefix) {
-    if (prefix == "def") {
-        var subQueueSize = def_subQueue.length;
-        var mainQueueSize = def_mainQueue.length;
-        def_shiftToMain = def_subQueue.splice(0, subQueueSize);
-        def_mainQueue = def_shiftToMain.concat(def_mainQueue);
-        def_shiftToSub = def_mainQueue.splice(mainQueueSize, subQueueSize);
-        def_subQueue = def_shiftToSub.concat(def_subQueue);
-        def_shiftToMain = def_subQueue.slice();
-        def_shiftToSub = def_subQueue.length > 0 ? def_mainQueue.slice(-1 * def_subQueue.length) : [];
-    }
-    else if (prefix == "mid") {
-        var subQueueSize = mid_subQueue.length;
-        var mainQueueSize = mid_mainQueue.length;
-        mid_shiftToMain = mid_subQueue.splice(0, subQueueSize);
-        mid_mainQueue = mid_shiftToMain.concat(mid_mainQueue);
-        mid_shiftToSub = mid_mainQueue.splice(mainQueueSize, subQueueSize);
-        mid_subQueue = mid_shiftToSub.concat(mid_subQueue);
-        mid_shiftToMain = mid_subQueue.slice();
-        mid_shiftToSub = mid_subQueue.length > 0 ? mid_mainQueue.slice(-1 * mid_subQueue.length) : [];
-    }
-    else {
-        var subQueueSize = for_subQueue.length;
-        var mainQueueSize = for_mainQueue.length;
-        for_shiftToMain = for_subQueue.splice(0, subQueueSize);
-        for_mainQueue = for_shiftToMain.concat(for_mainQueue);
-        for_shiftToSub = for_mainQueue.splice(mainQueueSize, subQueueSize);
-        for_subQueue = for_shiftToSub.concat(for_subQueue);
-        for_shiftToMain = for_subQueue.slice();
-        for_shiftToSub = for_subQueue.length > 0 ? for_mainQueue.slice(-1 * for_subQueue.length) : [];
-    }
-}
-
-function getData() {
-    return {
-        def_mainQueue, def_subQueue, def_shiftToMain, def_shiftToSub,
-        mid_mainQueue, mid_subQueue, mid_shiftToMain, mid_shiftToSub,
-        for_mainQueue, for_subQueue, for_shiftToMain, for_shiftToSub
-    };
-}
-
-function init() {
-    initQueue('Def');
-    initQueue('Mid');
-    initQueue('For');
-}
-
-function initQueue(type) {
-    switch (type) {
-        case 'Def':
-            // clear and init queue
-            resetAndInitQueueState(def_mainQueue, def_mainQueueSize, type, 0);
-            resetAndInitQueueState(def_subQueue, def_subQueueSize, type, def_mainQueueSize);
-            def_shiftToMain = def_subQueue.slice();
-            def_shiftToSub = def_subQueue.length > 0 ? def_mainQueue.slice(-1 * def_subQueue.length) : [];
-            break;
-        case 'Mid':
-            // clear and init queue
-            resetAndInitQueueState(mid_mainQueue, mid_mainQueueSize, type, 0);
-            resetAndInitQueueState(mid_subQueue, mid_subQueueSize, type, mid_mainQueueSize);
-            mid_shiftToMain = mid_subQueue.slice();
-            mid_shiftToSub = mid_subQueue.length > 0 ? mid_mainQueue.slice(-1 * mid_subQueue.length) : [];
-            break;
-        case 'For':
-            // clear and init queue
-            resetAndInitQueueState(for_mainQueue, for_mainQueueSize, type, 0);
-            resetAndInitQueueState(for_subQueue, for_subQueueSize, type, for_mainQueueSize);
-            for_shiftToMain = for_subQueue.slice();
-            for_shiftToSub = for_subQueue.length > 0 ? for_mainQueue.slice(-1 * for_subQueue.length) : [];
-            break;
-        default:
-            break;
-    }
-}
-
-function resetAndInitQueueState(queue, size, prefix, startIndex) {
-    queue.length = 0;
-    for (let i = startIndex + size - 1; i >= startIndex; i--) {
-        var post_fix = i + 1;
-        queue.push(prefix + " " + post_fix);
-    }
-}
 
 function getTimer(prefix) {
     var timerInstance = null;
@@ -147,36 +71,106 @@ function getTimer(prefix) {
     return timerInstance;
 }
 
-function getQueues(prefix) {
-    var subQueue = null;
-    var mainQueue = null;
-    var shiftToMain = null;
-    var shiftToSub = null;
-    switch(prefix) {
+function getPositionQueueSingleton(prefix) {
+    switch (prefix) {
         case 'def':
-            subQueue = def_subQueue;
-            mainQueue = def_mainQueue;
-            shiftToMain = def_shiftToMain;
-            shiftToSub = def_shiftToSub;
-            break;
-        case "mid":
-            subQueue = mid_subQueue;
-            mainQueue = mid_mainQueue;
-            shiftToMain = mid_shiftToMain;
-            shiftToSub = mid_shiftToSub;
-            break;
+        case 'Def':
+            return def_queues;
+        case 'mid':
+        case 'Mid':
+            return mid_queues;
         case 'for':
-            subQueue = for_subQueue;
-            mainQueue = for_mainQueue;
-            shiftToMain = for_shiftToMain;
-            shiftToSub = for_shiftToSub;
-            break;
-        default: 
+        case 'For':
+            return for_queues;
+        default:
             break;
     }
-    return (subQueue, mainQueue, shiftToMain, shiftToSub);
-
+    return null;
 }
+
+function getData() {
+    // readonly
+    var def_mainQueue = def_queues.mainQueue;
+    var def_subQueue = def_queues.subQueue;
+    var def_shiftToMain = def_queues.shiftToMain;
+    var def_shiftToSub = def_queues.shiftToSub;
+
+    var mid_mainQueue = mid_queues.mainQueue;
+    var mid_subQueue = mid_queues.subQueue;
+    var mid_shiftToMain = mid_queues.shiftToMain;
+    var mid_shiftToSub = mid_queues.shiftToSub;
+
+    var for_mainQueue = for_queues.mainQueue;
+    var for_subQueue = for_queues.subQueue;
+    var for_shiftToMain = for_queues.shiftToMain;
+    var for_shiftToSub = for_queues.shiftToSub;
+
+    return {
+        def_mainQueue, def_subQueue, def_shiftToMain, def_shiftToSub,
+        mid_mainQueue, mid_subQueue, mid_shiftToMain, mid_shiftToSub,
+        for_mainQueue, for_subQueue, for_shiftToMain, for_shiftToSub
+    };
+}
+
+function setShiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
+    var positionQueue = getPositionQueueSingleton(prefix);
+    var mainQueue = positionQueue.mainQueue;
+    var subQueue = positionQueue.subQueue;
+    if (shiftType == ShiftType.SUB_AT_ONCE) {
+        positionQueue.shiftToMain = subQueue.slice();
+        positionQueue.shiftToSub = subQueue.length > 0 ? mainQueue.slice(-1 * subQueue.length) : [];
+    }
+    else {
+        positionQueue.shiftToMain = subQueue.length > 0 ? subQueue.slice(-1) : [];
+        positionQueue.shiftToSub = subQueue.length > 0 ? mainQueue.slice(-1) : [];
+    }
+}
+
+function shiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
+    var queueInstances = getPositionQueueSingleton(prefix);
+    var subQueueSize = queueInstances.subQueue.length;
+    var mainQueueSize = queueInstances.mainQueue.length;
+    var toMoveToMain = null;
+    var toMoveToSub = null;
+
+    if (shiftType == ShiftType.SUB_AT_ONCE) {
+        toMoveToMain = queueInstances.subQueue.splice(0, subQueueSize);
+        queueInstances.mainQueue = toMoveToMain.concat(queueInstances.mainQueue);
+        toMoveToSub = queueInstances.mainQueue.splice(mainQueueSize, subQueueSize);
+        queueInstances.subQueue = toMoveToSub.concat(queueInstances.subQueue);
+    }
+    else {
+        if (subQueueSize > 0) {
+            toMoveToMain = queueInstances.subQueue.splice(subQueueSize - 2, 1);
+            queueInstances.mainQueue = toMoveToMain.concat(queueInstances.mainQueue);
+            toMoveToSub = queueInstances.mainQueue.splice(mainQueueSize, subQueueSize);
+            queueInstances.subQueue = toMoveToSub.concat(queueInstances.subQueue);
+        }
+    }
+    setShiftQueues(prefix, shiftType);
+}
+
+function init() {
+    initQueue('Def');
+    initQueue('Mid');
+    initQueue('For');
+}
+
+function initQueue(prefix) {
+    var positionQueue = getPositionQueueSingleton(prefix);
+    resetAndInitQueueState(positionQueue.mainQueue, positionQueue.mainQueueSize, prefix, 0);
+    resetAndInitQueueState(positionQueue.subQueue, positionQueue.subQueueSize, prefix, positionQueue.mainQueueSize);
+    setShiftQueues(prefix);
+}
+
+function resetAndInitQueueState(queue, size, prefix, startIndex) {
+    queue.length = 0;
+    for (let i = startIndex + size - 1; i >= startIndex; i--) {
+        var post_fix = i + 1;
+        queue.push(prefix + " " + post_fix);
+    }
+}
+
 
 
 
@@ -228,6 +222,21 @@ io.on('connection', (socket) => {
         startTimer(prefix)
     });
 
+    // Handle force update event from the client
+    socket.on('forceUpdate', (queueData, prefix) => {
+        var subQueueData = queueData.subQueue;
+        var mainQueueData = queueData.mainQueue;
+        var currentQueueInstances = getPositionQueueSingleton(prefix);
+
+        // force update
+        currentQueueInstances.subQueue = subQueueData;
+        currentQueueInstances.mainQueue = mainQueueData;
+        setShiftQueues(prefix);
+
+        // update display
+        socket.emit('queueData', getData());
+    });
+
     // Handle queueDataRequest event from the client
     socket.on('queueDataRequest', () => {
         // Send the initial queue data to the client
@@ -235,27 +244,19 @@ io.on('connection', (socket) => {
     });
 
     // Handle updateSubQueueSize event from the client
-    socket.on('updateSubQueueSize', (size, type) => {
-        // set sub queue size
-        switch (type) {
-            case 'Def':
-                def_subQueueSize = size;
-                initQueue('Def');
-                socket.emit('queueData', getData());
-                break;
-            case 'Mid':
-                mid_subQueueSize = size;
-                initQueue('Mid');
-                socket.emit('queueData', getData());
-                break;
-            case 'For':
-                for_subQueueSize = size;
-                initQueue('For');
-                socket.emit('queueData', getData());
-                break;
-            default:
-                break;
-        }
+    socket.on('updateSubQueueSize', (size, prefix) => {
+        var positionQueueInstance = getPositionQueueSingleton(prefix);
+        positionQueueInstance.subQueueSize = size;
+        initQueue(prefix);
+        socket.emit('queueData', getData());
+    });
+
+    // Handle updateMainQueueSize event from the client
+    socket.on('updateMainQueueSize', (size, prefix) => {
+        var positionQueueInstance = getPositionQueueSingleton(prefix);
+        positionQueueInstance.mainQueueSize = size;
+        initQueue(prefix);
+        socket.emit('queueData', getData());
     });
 
     // Handle updateSubQueueSize event from the client
@@ -270,31 +271,6 @@ io.on('connection', (socket) => {
         timerInstance.remainingSeconds = defaultTimeoutSeconds; // 10 minutes in seconds
         io.emit(prefix + '-' + 'countdown', timerInstance.remainingSeconds);
         timerInstance.startTimerClicked = false;
-    });
-
-
-    // Handle updateMainQueueSize event from the client
-    socket.on('updateMainQueueSize', (size, type) => {
-        // set sub queue size
-        switch (type) {
-            case 'Def':
-                def_mainQueueSize = size;
-                initQueue('Def');
-                socket.emit('queueData', getData());
-                break;
-            case 'Mid':
-                mid_mainQueueSize = size;
-                initQueue('Mid');
-                socket.emit('queueData', getData());
-                break;
-            case 'For':
-                for_mainQueueSize = size;
-                initQueue('For');
-                socket.emit('queueData', getData());
-                break;
-            default:
-                break;
-        }
     });
 });
 
