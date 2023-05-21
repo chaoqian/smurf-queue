@@ -8,6 +8,7 @@ function displayQueues(queueData) {
   displayShiftToMainQueueElements(queueData.def_shiftToMain, 'D');
   // Display elements shifting from main queue to sub queue
   displayShiftToSubQueueElements(queueData.def_shiftToSub, 'D');
+  document.getElementById('def-shiftType').innerHTML = "Sub Type: " + queueData.def_shiftType;
 
   // Midfielder
   document.getElementById('mainQueueElements-M').innerHTML = queueData.mid_mainQueue.map(createQueueElement).join('');
@@ -16,6 +17,7 @@ function displayQueues(queueData) {
   displayShiftToMainQueueElements(queueData.mid_shiftToMain, 'M');
   // Display elements shifting from main queue to sub queue
   displayShiftToSubQueueElements(queueData.mid_shiftToSub, 'M');
+  document.getElementById('mid-shiftType').innerHTML = "Sub Type: " + queueData.mid_shiftType;
 
   // Forward
   document.getElementById('mainQueueElements-F').innerHTML = queueData.for_mainQueue.map(createQueueElement).join('');
@@ -24,6 +26,7 @@ function displayQueues(queueData) {
   displayShiftToMainQueueElements(queueData.for_shiftToMain, 'F');
   // Display elements shifting from main queue to sub queue
   displayShiftToSubQueueElements(queueData.for_shiftToSub, 'F');
+  document.getElementById('for-shiftType').innerHTML = "Sub Type: " + queueData.for_shiftType;
 }
 
 function createQueueElement(element) {

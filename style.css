@@ -120,6 +120,10 @@ h1 {
   margin-right: 10px;
 }
 
+.buttons label {
+  margin-right: 10px;
+}
+
 .shift-section {
   margin-top: 20px;
   width: 300px;
@@ -201,4 +205,3 @@ h1 {
 .queue-size-input button:hover {
   background-color: #45a049;
 }
-

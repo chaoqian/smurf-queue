@@ -54,10 +54,37 @@ for_updateDefaultTimeoutSecondsButton.addEventListener('click', () => {
   updateDefaultTimeoutSeconds(for_defaultTimeoutSeconds, 'for');
 });
 
+// Handle shift type update
+const def_shiftTypeDropdown = document.getElementById('defShiftTypeDropdown');
+const def_confirmButton = document.getElementById('defShiftTypeConfirmButton');
+def_confirmButton.addEventListener('click', function() {
+  const selectedShiftType = def_shiftTypeDropdown.value;
+  updateShiftType(selectedShiftType, 'def');
+});
+
+const mid_shiftTypeDropdown = document.getElementById('midShiftTypeDropdown');
+const mid_confirmButton = document.getElementById('midShiftTypeConfirmButton');
+mid_confirmButton.addEventListener('click', function() {
+  const selectedShiftType = mid_shiftTypeDropdown.value;
+  updateShiftType(selectedShiftType, 'mid');
+});
+
+const for_shiftTypeDropdown = document.getElementById('forShiftTypeDropdown');
+const for_confirmButton = document.getElementById('forShiftTypeConfirmButton');
+for_confirmButton.addEventListener('click', function() {
+  const selectedShiftType = for_shiftTypeDropdown.value;
+  updateShiftType(selectedShiftType, 'for');
+});
+
 
 // Function to update the sub queue size
 function updateSubQueueSize(size, type) {
   socket.emit('updateSubQueueSize', size, type);
+}
+
+// Function to update shiftType
+function updateShiftType(shiftType, type) {
+  socket.emit('updateShiftType', shiftType, type);
 }
 
 // Function to update default timeout seconds

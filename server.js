@@ -7,7 +7,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 const ShiftType = {
     ONE_BY_ONE: 'one by one',
-    SUB_AT_ONCE: 'sub all at once'
+    SUB_AT_ONCE: 'all at once'
 };
 
 // Queue data stored in memory (replace with a database in production)
@@ -18,6 +18,7 @@ class PositionQueues {
     shiftToSub;
     mainQueueSize;
     subQueueSize;
+    shiftType;
 
     constructor() {
         this.mainQueue = [];
@@ -26,6 +27,7 @@ class PositionQueues {
         this.shiftToSub = [];
         this.mainQueueSize = 3;
         this.subQueueSize = 0;
+        this.shiftType = ShiftType.SUB_AT_ONCE;
     }
 }
 
@@ -94,28 +96,33 @@ function getData() {
     var def_subQueue = def_queues.subQueue;
     var def_shiftToMain = def_queues.shiftToMain;
     var def_shiftToSub = def_queues.shiftToSub;
+    var def_shiftType = def_queues.shiftType;
 
     var mid_mainQueue = mid_queues.mainQueue;
     var mid_subQueue = mid_queues.subQueue;
     var mid_shiftToMain = mid_queues.shiftToMain;
     var mid_shiftToSub = mid_queues.shiftToSub;
+    var mid_shiftType = mid_queues.shiftType;
 
     var for_mainQueue = for_queues.mainQueue;
     var for_subQueue = for_queues.subQueue;
     var for_shiftToMain = for_queues.shiftToMain;
     var for_shiftToSub = for_queues.shiftToSub;
+    var for_shiftType = for_queues.shiftType;
+
 
     return {
-        def_mainQueue, def_subQueue, def_shiftToMain, def_shiftToSub,
-        mid_mainQueue, mid_subQueue, mid_shiftToMain, mid_shiftToSub,
-        for_mainQueue, for_subQueue, for_shiftToMain, for_shiftToSub
+        def_mainQueue, def_subQueue, def_shiftToMain, def_shiftToSub, def_shiftType,
+        mid_mainQueue, mid_subQueue, mid_shiftToMain, mid_shiftToSub, mid_shiftType,
+        for_mainQueue, for_subQueue, for_shiftToMain, for_shiftToSub, for_shiftType
     };
 }
 
-function setShiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
+function setShiftQueues(prefix) {
     var positionQueue = getPositionQueueSingleton(prefix);
     var mainQueue = positionQueue.mainQueue;
     var subQueue = positionQueue.subQueue;
+    var shiftType = positionQueue.shiftType;
     if (shiftType == ShiftType.SUB_AT_ONCE) {
         positionQueue.shiftToMain = subQueue.slice();
         positionQueue.shiftToSub = subQueue.length > 0 ? mainQueue.slice(-1 * subQueue.length) : [];
@@ -126,13 +133,13 @@ function setShiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
     }
 }
 
-function shiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
+function shiftQueues(prefix) {
     var queueInstances = getPositionQueueSingleton(prefix);
     var subQueueSize = queueInstances.subQueue.length;
     var mainQueueSize = queueInstances.mainQueue.length;
     var toMoveToMain = null;
     var toMoveToSub = null;
-
+    var shiftType = queueInstances.shiftType;
     if (shiftType == ShiftType.SUB_AT_ONCE) {
         toMoveToMain = queueInstances.subQueue.splice(0, subQueueSize);
         queueInstances.mainQueue = toMoveToMain.concat(queueInstances.mainQueue);
@@ -141,13 +148,13 @@ function shiftQueues(prefix, shiftType = ShiftType.SUB_AT_ONCE) {
     }
     else {
         if (subQueueSize > 0) {
-            toMoveToMain = queueInstances.subQueue.splice(subQueueSize - 2, 1);
+            toMoveToMain = queueInstances.subQueue.splice(subQueueSize - 1, 1);
             queueInstances.mainQueue = toMoveToMain.concat(queueInstances.mainQueue);
             toMoveToSub = queueInstances.mainQueue.splice(mainQueueSize, subQueueSize);
             queueInstances.subQueue = toMoveToSub.concat(queueInstances.subQueue);
         }
     }
-    setShiftQueues(prefix, shiftType);
+    setShiftQueues(prefix);
 }
 
 function init() {
@@ -178,7 +185,7 @@ init();
 // Socket.io event handlers
 io.on('connection', (socket) => {
     // Send the initial queue data to the client
-    socket.emit('queueData', getData());
+    io.emit('queueData', getData());
 
     // Start the countdown timer
     function startTimer(prefix) {
@@ -234,13 +241,25 @@ io.on('connection', (socket) => {
         setShiftQueues(prefix);
 
         // update display
-        socket.emit('queueData', getData());
+        io.emit('queueData', getData());
+    });
+
+    // Handle force update event from the client
+    socket.on('updateShiftType', (shiftType, prefix) => {
+        var currentQueueInstances = getPositionQueueSingleton(prefix);
+
+        // force update shift type
+        currentQueueInstances.shiftType = shiftType == 'One-By-One' ? ShiftType.ONE_BY_ONE : ShiftType.SUB_AT_ONCE;
+        setShiftQueues(prefix);
+
+        // update display
+        io.emit('queueData', getData());
     });
 
     // Handle queueDataRequest event from the client
     socket.on('queueDataRequest', () => {
         // Send the initial queue data to the client
-        socket.emit('queueData', getData());
+        io.emit('queueData', getData());
     });
 
     // Handle updateSubQueueSize event from the client
@@ -248,7 +267,7 @@ io.on('connection', (socket) => {
         var positionQueueInstance = getPositionQueueSingleton(prefix);
         positionQueueInstance.subQueueSize = size;
         initQueue(prefix);
-        socket.emit('queueData', getData());
+        io.emit('queueData', getData());
     });
 
     // Handle updateMainQueueSize event from the client
@@ -256,7 +275,7 @@ io.on('connection', (socket) => {
         var positionQueueInstance = getPositionQueueSingleton(prefix);
         positionQueueInstance.mainQueueSize = size;
         initQueue(prefix);
-        socket.emit('queueData', getData());
+        io.emit('queueData', getData());
     });
 
     // Handle updateSubQueueSize event from the client
