@@ -15,6 +15,16 @@
   background-color: #069b33;
 }
 
+.draggable {
+  cursor: move;
+  opacity: 0.6;
+}
+
+.draggable:hover {
+  opacity: 1;
+  background-color: #f2f2f2;
+  border: 2px dashed #ccc;
+}
 
 #shiftDisplayContainer {
   margin-top: 20px;

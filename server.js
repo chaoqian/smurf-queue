@@ -147,6 +147,39 @@ function getTimer(prefix) {
     return timerInstance;
 }
 
+function getQueues(prefix) {
+    var subQueue = null;
+    var mainQueue = null;
+    var shiftToMain = null;
+    var shiftToSub = null;
+    switch(prefix) {
+        case 'def':
+            subQueue = def_subQueue;
+            mainQueue = def_mainQueue;
+            shiftToMain = def_shiftToMain;
+            shiftToSub = def_shiftToSub;
+            break;
+        case "mid":
+            subQueue = mid_subQueue;
+            mainQueue = mid_mainQueue;
+            shiftToMain = mid_shiftToMain;
+            shiftToSub = mid_shiftToSub;
+            break;
+        case 'for':
+            subQueue = for_subQueue;
+            mainQueue = for_mainQueue;
+            shiftToMain = for_shiftToMain;
+            shiftToSub = for_shiftToSub;
+            break;
+        default: 
+            break;
+    }
+    return (subQueue, mainQueue, shiftToMain, shiftToSub);
+
+}
+
+
+
 init();
 // Socket.io event handlers
 io.on('connection', (socket) => {
@@ -268,6 +301,10 @@ io.on('connection', (socket) => {
 // Serve the client-side JavaScript file
 app.get('/script.js', (req, res) => {
     res.sendFile(__dirname + '/script.js');
+});
+
+app.get('/drag-drop-script.js', (req, res) => {
+    res.sendFile(__dirname + '/drag-drop-script.js');
 });
 
 // Serve the client-side JavaScript file

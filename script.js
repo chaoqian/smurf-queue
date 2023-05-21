@@ -27,7 +27,8 @@ function displayQueues(queueData) {
 }
 
 function createQueueElement(element) {
-  return '<div class="queue-element">' + element + '</div>';
+  var id_string = element.replace(/\s+/g, "-");
+  return '<div class="queue-element draggable" draggable="true" id="' + id_string + '">' + element + '</div>';
 }
 
 function displayCountdown(seconds, prefix) {
