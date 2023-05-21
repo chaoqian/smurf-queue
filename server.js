@@ -185,7 +185,7 @@ init();
 // Socket.io event handlers
 io.on('connection', (socket) => {
     // Send the initial queue data to the client
-    io.emit('queueData', getData());
+    socket.emit('queueData', getData());
 
     // Start the countdown timer
     function startTimer(prefix) {
@@ -240,7 +240,7 @@ io.on('connection', (socket) => {
         currentQueueInstances.mainQueue = mainQueueData;
         setShiftQueues(prefix);
 
-        // update display
+        // update display for all clients
         io.emit('queueData', getData());
     });
 
@@ -259,7 +259,7 @@ io.on('connection', (socket) => {
     // Handle queueDataRequest event from the client
     socket.on('queueDataRequest', () => {
         // Send the initial queue data to the client
-        io.emit('queueData', getData());
+        socket.emit('queueData', getData());
     });
 
     // Handle updateSubQueueSize event from the client
