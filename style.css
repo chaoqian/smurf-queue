@@ -152,14 +152,16 @@ h1 {
   animation-name: shiftToMainAnimation;
   animation-duration: 10s;
   animation-fill-mode: forwards;
-  animation-iteration-count: infinite; /* Make the animation repeat indefinitely */
+  animation-iteration-count: infinite;
+  /* Make the animation repeat indefinitely */
 }
 
 .shift-section.main-queue .shift-animation {
   animation-name: shiftToSubAnimation;
   animation-duration: 10s;
   animation-fill-mode: forwards;
-  animation-iteration-count: infinite; /* Make the animation repeat indefinitely */
+  animation-iteration-count: infinite;
+  /* Make the animation repeat indefinitely */
 }
 
 @keyframes shiftToMainAnimation {
@@ -167,6 +169,7 @@ h1 {
     transform: translateX(0);
     opacity: 0;
   }
+
   100% {
     transform: translateX(calc(100% - 20px));
     opacity: 1;
@@ -178,6 +181,7 @@ h1 {
     transform: translateX(0);
     opacity: 0;
   }
+
   100% {
     transform: translateX(calc(-100% + 20px));
     opacity: 1;
