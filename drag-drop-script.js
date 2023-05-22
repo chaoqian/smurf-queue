@@ -18,6 +18,15 @@ function dragOver(event) {
   event.preventDefault();
 }
 
+function addElementsAtBeginning(parentElement, element) {
+  if (parentElement.children.length == 0) {
+    parentElement.appendChild(element);
+  }
+  else {
+    parentElement.insertBefore(element, parentElement.children[0]);
+  }
+}
+
 // Drop event handler
 function drop(event) {
   event.preventDefault();
@@ -27,12 +36,12 @@ function drop(event) {
 
   if (dropzone.classList.contains('elements-wrapper')) {
     // empty
-    dropzone.appendChild(element);
+    addElementsAtBeginning(dropzone, element);
   } else if (dropzone.classList.contains('queue')) {
     const allChildren = dropzone.children;
     for (var index = 0; index < allChildren.length; index++) {
       if (allChildren[index].classList.contains('elements-wrapper')) {
-        allChildren[index].appendChild(element);
+        addElementsAtBeginning(allChildren[index], element);
         break;
       }
     }
@@ -41,8 +50,6 @@ function drop(event) {
     const dropIndex = Array.from(siblings).indexOf(dropzone);
     dropzone.parentNode.insertBefore(element, siblings[dropIndex + 1]);
   }
-
-  // TODO: send latest to server and update memory
 }
 
 // get current queue elelemnts

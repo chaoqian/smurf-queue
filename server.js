@@ -178,7 +178,16 @@ function resetAndInitQueueState(queue, size, prefix, startIndex) {
     }
 }
 
+function updatePositionQueue(queueData, prefix) {
+    var subQueueData = queueData.subQueue;
+    var mainQueueData = queueData.mainQueue;
+    var currentQueueInstances = getPositionQueueSingleton(prefix);
 
+    // force update
+    currentQueueInstances.subQueue = subQueueData;
+    currentQueueInstances.mainQueue = mainQueueData;
+    setShiftQueues(prefix);
+}
 
 
 init();
@@ -231,14 +240,7 @@ io.on('connection', (socket) => {
 
     // Handle force update event from the client
     socket.on('forceUpdate', (queueData, prefix) => {
-        var subQueueData = queueData.subQueue;
-        var mainQueueData = queueData.mainQueue;
-        var currentQueueInstances = getPositionQueueSingleton(prefix);
-
-        // force update
-        currentQueueInstances.subQueue = subQueueData;
-        currentQueueInstances.mainQueue = mainQueueData;
-        setShiftQueues(prefix);
+        updatePositionQueue(queueData, prefix);
 
         // update display for all clients
         io.emit('queueData', getData());
