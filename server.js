@@ -125,8 +125,9 @@ function setShiftQueues(prefix) {
     var subQueue = positionQueue.subQueue;
     var shiftType = positionQueue.shiftType;
     if (shiftType == ShiftType.SUB_AT_ONCE) {
-        positionQueue.shiftToMain = subQueue.slice();
-        positionQueue.shiftToSub = subQueue.length > 0 ? mainQueue.slice(-1 * subQueue.length) : [];
+        var numberOfElementsCanMove = Math.min(subQueue.length, mainQueue.length);
+        positionQueue.shiftToMain = subQueue.slice(-1 * numberOfElementsCanMove);
+        positionQueue.shiftToSub = numberOfElementsCanMove > 0 ? mainQueue.slice(-1 * numberOfElementsCanMove) : [];
     }
     else {
         positionQueue.shiftToMain = subQueue.length > 0 ? subQueue.slice(-1) : [];
@@ -142,9 +143,10 @@ function shiftQueues(prefix) {
     var toMoveToSub = null;
     var shiftType = queueInstances.shiftType;
     if (shiftType == ShiftType.SUB_AT_ONCE) {
-        toMoveToMain = queueInstances.subQueue.splice(0, subQueueSize);
+        var numberOfElementsCanMove = Math.min(subQueueSize, mainQueueSize);
+        toMoveToMain = queueInstances.subQueue.splice(subQueueSize - numberOfElementsCanMove, numberOfElementsCanMove);
         queueInstances.mainQueue = toMoveToMain.concat(queueInstances.mainQueue);
-        toMoveToSub = queueInstances.mainQueue.splice(mainQueueSize, subQueueSize);
+        toMoveToSub = queueInstances.mainQueue.splice(mainQueueSize, numberOfElementsCanMove);
         queueInstances.subQueue = toMoveToSub.concat(queueInstances.subQueue);
     }
     else {
