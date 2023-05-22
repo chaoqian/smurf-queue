@@ -15,6 +15,10 @@
   background-color: #069b33;
 }
 
+.override-button {
+  background-color: #e1f1b2
+}
+
 .draggable {
   cursor: move;
   opacity: 0.6;

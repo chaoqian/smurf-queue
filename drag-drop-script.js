@@ -90,20 +90,25 @@ all_queues.forEach((element) => {
 
 
 // Handle force update button click event
-const def_forceUpdateButton = document.getElementById('def-forceUpdate');
-def_forceUpdateButton.addEventListener('click', () => {
+const forceUpdateButton = document.getElementById('forceUpdate');
+forceUpdateButton.addEventListener('click', () => {
   // get current queue data
-  socket.emit('forceUpdate', getQueueElements('def'), 'def');
+  socket.emit('forceUpdate', {
+    def_queues: getQueueElements('def'),
+    mid_queues: getQueueElements('mid'),
+    for_queues: getQueueElements('for')
+  }, 'all');
 });
 
-const mid_forceUpdateButton = document.getElementById('mid-forceUpdate');
-mid_forceUpdateButton.addEventListener('click', () => {
-  // get current queue data
-  socket.emit('forceUpdate', getQueueElements('mid'), 'mid');
-});
-
-const for_forceUpdateButton = document.getElementById('for-forceUpdate');
-for_forceUpdateButton.addEventListener('click', () => {
-  // get current queue data
-  socket.emit('forceUpdate', getQueueElements('for'), 'for');
+socket.on('forceUpdateResponse', (response) => {
+  // handle response
+  console.log('Response from server:', response);
+  var displya_text = "";
+  if (response == "success") {
+    displya_text = "update success!";
+  }
+  else {
+    displya_text = "update failed! Please retry after 5 seconds.";
+  }
+  document.getElementById('forceUpdateStatus').innerHTML = displya_text;
 });

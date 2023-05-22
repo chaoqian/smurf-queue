@@ -53,6 +53,7 @@ let def_timer = new Timer();
 let mid_timer = new Timer();
 let for_timer = new Timer();
 
+let overrideLocked = false;
 
 function getTimer(prefix) {
     var timerInstance = null;
@@ -240,10 +241,24 @@ io.on('connection', (socket) => {
 
     // Handle force update event from the client
     socket.on('forceUpdate', (queueData, prefix) => {
-        updatePositionQueue(queueData, prefix);
-
+        if (overrideLocked == true) {
+            socket.emit('forceUpdateResponse', 'failed');
+            return;
+        }
+        overrideLocked = true;
+        if (prefix == "all") {
+            updatePositionQueue(queueData.def_queues, 'def');
+            updatePositionQueue(queueData.mid_queues, 'mid');
+            updatePositionQueue(queueData.for_queues, 'for');
+        }
+        else {
+            // single position update
+            updatePositionQueue(queueData, prefix);
+        }
         // update display for all clients
         io.emit('queueData', getData());
+        socket.emit('forceUpdateResponse', "success");
+        overrideLocked = false;
     });
 
     // Handle force update event from the client
